@@ -1,0 +1,7 @@
+[
+  {"id": "doc001", "name": "Dr. Ananya Reddy", "specialty": "General Medicine", "available": true, "slots": ["09:00","09:30","10:00","10:30","11:00","14:00","14:30"]},
+  {"id": "doc002", "name": "Dr. Ravi Kumar", "specialty": "Cardiology", "available": true, "slots": ["09:30","10:00","10:30","11:00","11:30","15:00"]},
+  {"id": "doc003", "name": "Dr. Priya Sharma", "specialty": "Dermatology", "available": true, "slots": ["09:00","10:00","11:00","14:00","14:30","15:00"]},
+  {"id": "doc004", "name": "Dr. Vikram Nair", "specialty": "Orthopaedics", "available": false, "slots": []},
+  {"id": "doc005", "name": "Dr. Sunita Rao", "specialty": "Paediatrics", "available": true, "slots": ["09:00","09:30","10:00","10:30","11:30","14:00"]}
+]
