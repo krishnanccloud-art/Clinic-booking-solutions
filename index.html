@@ -1,0 +1,683 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CarePoint — Clinic Booking</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --teal: #1D9E75;
+    --teal-light: #E1F5EE;
+    --teal-dark: #085041;
+    --coral: #D85A30;
+    --coral-light: #FAECE7;
+    --amber: #BA7517;
+    --amber-light: #FAEEDA;
+    --gray: #5F5E5A;
+    --gray-light: #F1EFE8;
+    --text: #2C2C2A;
+    --text-muted: #888780;
+    --border: rgba(0,0,0,0.1);
+    --white: #ffffff;
+    --bg: #f8f7f4;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--text); }
+
+  /* NAV */
+  nav {
+    background: var(--white);
+    border-bottom: 1px solid var(--border);
+    padding: 0 2rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    height: 64px;
+    position: sticky; top: 0; z-index: 100;
+  }
+  .logo { font-family: 'Playfair Display', serif; font-size: 22px; color: var(--teal-dark); }
+  .logo span { color: var(--coral); }
+  .nav-links { display: flex; gap: 2rem; align-items: center; }
+  .nav-links a { text-decoration: none; color: var(--gray); font-size: 14px; font-weight: 500; transition: color 0.2s; cursor: pointer; }
+  .nav-links a:hover, .nav-links a.active { color: var(--teal); }
+  .nav-btn { background: var(--teal); color: white; border: none; padding: 8px 20px; border-radius: 40px; font-size: 14px; font-weight: 500; cursor: pointer; font-family: 'DM Sans', sans-serif; transition: background 0.2s; }
+  .nav-btn:hover { background: var(--teal-dark); }
+  #user-display { font-size: 13px; color: var(--teal); font-weight: 500; }
+
+  /* PAGES */
+  .page { display: none; }
+  .page.active { display: block; }
+
+  /* HERO */
+  .hero {
+    background: linear-gradient(135deg, var(--teal-dark) 0%, var(--teal) 60%, #5DCAA5 100%);
+    padding: 5rem 2rem 4rem;
+    text-align: center;
+    color: white;
+  }
+  .hero h1 { font-family: 'Playfair Display', serif; font-size: clamp(2rem, 5vw, 3.5rem); margin-bottom: 1rem; line-height: 1.2; }
+  .hero p { font-size: 18px; opacity: 0.85; margin-bottom: 2.5rem; font-weight: 300; }
+  .hero-search { display: flex; max-width: 560px; margin: 0 auto; background: white; border-radius: 50px; overflow: hidden; box-shadow: 0 8px 32px rgba(0,0,0,0.15); }
+  .hero-search input { flex: 1; border: none; padding: 14px 20px; font-size: 15px; font-family: 'DM Sans', sans-serif; outline: none; color: var(--text); }
+  .hero-search button { background: var(--coral); color: white; border: none; padding: 14px 28px; font-size: 15px; font-weight: 500; cursor: pointer; font-family: 'DM Sans', sans-serif; transition: background 0.2s; }
+  .hero-search button:hover { background: #c04e26; }
+
+  /* STATS */
+  .stats { display: grid; grid-template-columns: repeat(3, 1fr); max-width: 700px; margin: -2rem auto 0; padding: 0 2rem; gap: 1rem; position: relative; z-index: 10; }
+  .stat-card { background: white; border-radius: 12px; padding: 1.25rem; text-align: center; box-shadow: 0 4px 16px rgba(0,0,0,0.08); }
+  .stat-card .num { font-size: 26px; font-weight: 600; color: var(--teal); font-family: 'Playfair Display', serif; }
+  .stat-card .lbl { font-size: 12px; color: var(--text-muted); margin-top: 4px; }
+
+  /* SECTION */
+  .section { padding: 4rem 2rem; max-width: 1100px; margin: 0 auto; }
+  .section-title { font-family: 'Playfair Display', serif; font-size: 28px; color: var(--text); margin-bottom: 0.5rem; }
+  .section-sub { color: var(--text-muted); font-size: 15px; margin-bottom: 2rem; }
+
+  /* FILTERS */
+  .filters { display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 2rem; }
+  .filter-btn { border: 1px solid var(--border); background: white; padding: 8px 18px; border-radius: 40px; font-size: 13px; font-weight: 500; cursor: pointer; font-family: 'DM Sans', sans-serif; color: var(--gray); transition: all 0.2s; }
+  .filter-btn:hover, .filter-btn.active { background: var(--teal); color: white; border-color: var(--teal); }
+
+  /* DOCTOR CARDS */
+  .doctors-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 1.5rem; }
+  .doctor-card { background: white; border-radius: 16px; overflow: hidden; border: 1px solid var(--border); transition: transform 0.2s, box-shadow 0.2s; }
+  .doctor-card:hover { transform: translateY(-4px); box-shadow: 0 12px 32px rgba(0,0,0,0.1); }
+  .doctor-card-top { background: var(--teal-light); padding: 1.5rem; display: flex; align-items: center; gap: 1rem; }
+  .doctor-avatar { width: 56px; height: 56px; border-radius: 50%; background: var(--teal); display: flex; align-items: center; justify-content: center; font-size: 20px; color: white; font-family: 'Playfair Display', serif; font-weight: 600; flex-shrink: 0; }
+  .doctor-name { font-weight: 500; font-size: 16px; margin-bottom: 2px; }
+  .doctor-spec { font-size: 13px; color: var(--teal); font-weight: 500; }
+  .doctor-card-body { padding: 1.25rem; }
+  .doctor-meta { display: flex; gap: 1rem; margin-bottom: 1rem; }
+  .meta-item { font-size: 13px; color: var(--text-muted); }
+  .meta-item strong { color: var(--text); font-weight: 500; display: block; font-size: 14px; }
+  .slots { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 1.25rem; }
+  .slot { background: var(--gray-light); border-radius: 6px; padding: 4px 10px; font-size: 12px; color: var(--gray); cursor: pointer; transition: all 0.15s; border: 1px solid transparent; }
+  .slot:hover, .slot.selected { background: var(--teal-light); color: var(--teal-dark); border-color: var(--teal); }
+  .unavailable-badge { background: var(--coral-light); color: var(--coral); font-size: 12px; padding: 4px 10px; border-radius: 6px; display: inline-block; }
+  .book-btn { width: 100%; background: var(--teal); color: white; border: none; padding: 10px; border-radius: 8px; font-size: 14px; font-weight: 500; cursor: pointer; font-family: 'DM Sans', sans-serif; transition: background 0.2s; }
+  .book-btn:hover { background: var(--teal-dark); }
+  .book-btn:disabled { background: var(--gray-light); color: var(--text-muted); cursor: not-allowed; }
+
+  /* BOOKING MODAL */
+  .modal-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.45); z-index: 200; align-items: center; justify-content: center; }
+  .modal-overlay.open { display: flex; }
+  .modal { background: white; border-radius: 20px; padding: 2rem; width: 100%; max-width: 480px; margin: 1rem; max-height: 90vh; overflow-y: auto; }
+  .modal h2 { font-family: 'Playfair Display', serif; font-size: 22px; margin-bottom: 1.5rem; }
+  .form-group { margin-bottom: 1.25rem; }
+  .form-group label { display: block; font-size: 13px; font-weight: 500; color: var(--text-muted); margin-bottom: 6px; text-transform: uppercase; letter-spacing: 0.05em; }
+  .form-group input, .form-group select, .form-group textarea { width: 100%; border: 1px solid var(--border); border-radius: 8px; padding: 10px 14px; font-size: 14px; font-family: 'DM Sans', sans-serif; color: var(--text); outline: none; transition: border-color 0.2s; background: var(--bg); }
+  .form-group input:focus, .form-group select:focus, .form-group textarea:focus { border-color: var(--teal); background: white; }
+  .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+  .modal-actions { display: flex; gap: 1rem; margin-top: 1.5rem; }
+  .btn-primary { flex: 1; background: var(--teal); color: white; border: none; padding: 12px; border-radius: 8px; font-size: 15px; font-weight: 500; cursor: pointer; font-family: 'DM Sans', sans-serif; transition: background 0.2s; }
+  .btn-primary:hover { background: var(--teal-dark); }
+  .btn-secondary { flex: 1; background: var(--gray-light); color: var(--gray); border: none; padding: 12px; border-radius: 8px; font-size: 15px; font-weight: 500; cursor: pointer; font-family: 'DM Sans', sans-serif; }
+
+  /* AUTH PAGE */
+  .auth-container { min-height: calc(100vh - 64px); display: flex; align-items: center; justify-content: center; padding: 2rem; }
+  .auth-box { background: white; border-radius: 20px; padding: 2.5rem; width: 100%; max-width: 420px; border: 1px solid var(--border); }
+  .auth-box h2 { font-family: 'Playfair Display', serif; font-size: 26px; margin-bottom: 0.5rem; }
+  .auth-box p { color: var(--text-muted); font-size: 14px; margin-bottom: 2rem; }
+  .auth-toggle { text-align: center; margin-top: 1.5rem; font-size: 14px; color: var(--text-muted); }
+  .auth-toggle a { color: var(--teal); cursor: pointer; font-weight: 500; text-decoration: none; }
+  .auth-tabs { display: flex; gap: 0; margin-bottom: 2rem; border: 1px solid var(--border); border-radius: 8px; overflow: hidden; }
+  .auth-tab { flex: 1; padding: 10px; text-align: center; font-size: 14px; font-weight: 500; cursor: pointer; color: var(--text-muted); transition: all 0.2s; background: var(--bg); }
+  .auth-tab.active { background: var(--teal); color: white; }
+  .alert { padding: 12px 16px; border-radius: 8px; font-size: 14px; margin-bottom: 1rem; }
+  .alert-success { background: var(--teal-light); color: var(--teal-dark); }
+  .alert-error { background: var(--coral-light); color: var(--coral); }
+
+  /* APPOINTMENTS PAGE */
+  .appointments-list { display: flex; flex-direction: column; gap: 1rem; }
+  .appt-card { background: white; border-radius: 12px; padding: 1.25rem 1.5rem; border: 1px solid var(--border); display: flex; align-items: center; gap: 1.5rem; }
+  .appt-status { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; }
+  .status-confirmed { background: var(--teal); }
+  .status-pending { background: var(--amber); }
+  .status-cancelled { background: var(--coral); }
+  .appt-info { flex: 1; }
+  .appt-info h3 { font-size: 16px; font-weight: 500; margin-bottom: 4px; }
+  .appt-info p { font-size: 13px; color: var(--text-muted); }
+  .appt-badge { font-size: 12px; padding: 4px 12px; border-radius: 20px; font-weight: 500; }
+  .badge-confirmed { background: var(--teal-light); color: var(--teal-dark); }
+  .badge-pending { background: var(--amber-light); color: var(--amber); }
+  .badge-cancelled { background: var(--coral-light); color: var(--coral); }
+  .cancel-btn { border: 1px solid var(--coral); color: var(--coral); background: none; padding: 6px 14px; border-radius: 6px; font-size: 13px; cursor: pointer; font-family: 'DM Sans', sans-serif; }
+  .cancel-btn:hover { background: var(--coral-light); }
+
+  /* ADMIN */
+  .admin-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem; margin-bottom: 2.5rem; }
+  .admin-stat { background: white; border-radius: 12px; padding: 1.5rem; border: 1px solid var(--border); }
+  .admin-stat .val { font-size: 32px; font-family: 'Playfair Display', serif; color: var(--teal); }
+  .admin-stat .key { font-size: 13px; color: var(--text-muted); margin-top: 4px; }
+  table { width: 100%; border-collapse: collapse; background: white; border-radius: 12px; overflow: hidden; border: 1px solid var(--border); }
+  th { background: var(--gray-light); padding: 12px 16px; text-align: left; font-size: 12px; text-transform: uppercase; letter-spacing: 0.05em; color: var(--text-muted); font-weight: 500; }
+  td { padding: 12px 16px; font-size: 14px; border-top: 1px solid var(--border); }
+  .empty-state { text-align: center; padding: 4rem 2rem; color: var(--text-muted); }
+  .empty-state .icon { font-size: 48px; margin-bottom: 1rem; opacity: 0.4; }
+  .empty-state p { font-size: 16px; }
+
+  /* TOAST */
+  .toast { position: fixed; bottom: 2rem; right: 2rem; background: var(--teal-dark); color: white; padding: 14px 24px; border-radius: 12px; font-size: 14px; font-weight: 500; z-index: 999; transform: translateY(100px); opacity: 0; transition: all 0.3s; box-shadow: 0 8px 24px rgba(0,0,0,0.2); }
+  .toast.show { transform: translateY(0); opacity: 1; }
+
+  @media (max-width: 600px) {
+    .stats { grid-template-columns: 1fr; }
+    .form-row { grid-template-columns: 1fr; }
+    .nav-links { gap: 1rem; }
+    .appt-card { flex-wrap: wrap; }
+  }
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav>
+  <div class="logo">Care<span>Point</span></div>
+  <div class="nav-links">
+    <a onclick="showPage('home')" class="active" id="nav-home">Home</a>
+    <a onclick="showPage('doctors')" id="nav-doctors">Doctors</a>
+    <a onclick="showPage('appointments')" id="nav-appointments">My Appointments</a>
+    <a onclick="showPage('admin')" id="nav-admin" style="display:none">Admin</a>
+    <span id="user-display"></span>
+    <button class="nav-btn" id="auth-nav-btn" onclick="showPage('auth')">Sign In</button>
+    <button class="nav-btn" id="logout-btn" style="display:none; background:var(--coral)" onclick="logout()">Logout</button>
+  </div>
+</nav>
+
+<!-- HOME PAGE -->
+<div id="page-home" class="page active">
+  <div class="hero">
+    <h1>Your Health,<br>Our Priority</h1>
+    <p>Book appointments with top doctors — fast, easy, and stress-free.</p>
+    <div class="hero-search">
+      <input type="text" id="hero-search" placeholder="Search doctor or speciality..." oninput="heroSearch(this.value)">
+      <button onclick="showPage('doctors')">Search</button>
+    </div>
+  </div>
+  <div class="stats">
+    <div class="stat-card"><div class="num">50+</div><div class="lbl">Expert Doctors</div></div>
+    <div class="stat-card"><div class="num">10k+</div><div class="lbl">Happy Patients</div></div>
+    <div class="stat-card"><div class="num">15+</div><div class="lbl">Specialities</div></div>
+  </div>
+  <div class="section" style="margin-top:3rem">
+    <div class="section-title">Popular Specialities</div>
+    <div class="section-sub">Find the right specialist for your needs</div>
+    <div style="display:grid; grid-template-columns:repeat(auto-fill,minmax(140px,1fr)); gap:1rem; margin-top:1rem">
+      <div onclick="filterAndGo('General Medicine')" style="background:white;border-radius:12px;padding:1.25rem;text-align:center;cursor:pointer;border:1px solid var(--border);transition:all 0.2s" onmouseover="this.style.borderColor='var(--teal)'" onmouseout="this.style.borderColor='var(--border)'">
+        <div style="font-size:28px;margin-bottom:8px">🩺</div>
+        <div style="font-size:13px;font-weight:500">General Medicine</div>
+      </div>
+      <div onclick="filterAndGo('Cardiology')" style="background:white;border-radius:12px;padding:1.25rem;text-align:center;cursor:pointer;border:1px solid var(--border);transition:all 0.2s" onmouseover="this.style.borderColor='var(--teal)'" onmouseout="this.style.borderColor='var(--border)'">
+        <div style="font-size:28px;margin-bottom:8px">❤️</div>
+        <div style="font-size:13px;font-weight:500">Cardiology</div>
+      </div>
+      <div onclick="filterAndGo('Dermatology')" style="background:white;border-radius:12px;padding:1.25rem;text-align:center;cursor:pointer;border:1px solid var(--border);transition:all 0.2s" onmouseover="this.style.borderColor='var(--teal)'" onmouseout="this.style.borderColor='var(--border)'">
+        <div style="font-size:28px;margin-bottom:8px">✨</div>
+        <div style="font-size:13px;font-weight:500">Dermatology</div>
+      </div>
+      <div onclick="filterAndGo('Orthopaedics')" style="background:white;border-radius:12px;padding:1.25rem;text-align:center;cursor:pointer;border:1px solid var(--border);transition:all 0.2s" onmouseover="this.style.borderColor='var(--teal)'" onmouseout="this.style.borderColor='var(--border)'">
+        <div style="font-size:28px;margin-bottom:8px">🦴</div>
+        <div style="font-size:13px;font-weight:500">Orthopaedics</div>
+      </div>
+      <div onclick="filterAndGo('Paediatrics')" style="background:white;border-radius:12px;padding:1.25rem;text-align:center;cursor:pointer;border:1px solid var(--border);transition:all 0.2s" onmouseover="this.style.borderColor='var(--teal)'" onmouseout="this.style.borderColor='var(--border)'">
+        <div style="font-size:28px;margin-bottom:8px">👶</div>
+        <div style="font-size:13px;font-weight:500">Paediatrics</div>
+      </div>
+      <div onclick="filterAndGo('')" style="background:var(--teal-light);border-radius:12px;padding:1.25rem;text-align:center;cursor:pointer;border:1px solid var(--teal);transition:all 0.2s">
+        <div style="font-size:28px;margin-bottom:8px">➕</div>
+        <div style="font-size:13px;font-weight:500;color:var(--teal-dark)">View All</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- DOCTORS PAGE -->
+<div id="page-doctors" class="page">
+  <div class="section">
+    <div class="section-title">Our Doctors</div>
+    <div class="section-sub">Book an appointment with our experienced specialists</div>
+    <div class="filters" id="speciality-filters">
+      <button class="filter-btn active" onclick="filterDoctors('', this)">All</button>
+    </div>
+    <div class="doctors-grid" id="doctors-grid">
+      <div class="empty-state"><div class="icon">⏳</div><p>Loading doctors...</p></div>
+    </div>
+  </div>
+</div>
+
+<!-- APPOINTMENTS PAGE -->
+<div id="page-appointments" class="page">
+  <div class="section">
+    <div class="section-title">My Appointments</div>
+    <div class="section-sub">Manage your upcoming and past appointments</div>
+    <div id="appointments-list" class="appointments-list">
+      <div class="empty-state"><div class="icon">📅</div><p>No appointments yet. Book one now!</p></div>
+    </div>
+  </div>
+</div>
+
+<!-- ADMIN PAGE -->
+<div id="page-admin" class="page">
+  <div class="section">
+    <div class="section-title">Admin Dashboard</div>
+    <div class="section-sub">Overview of all clinic bookings</div>
+    <div class="admin-grid">
+      <div class="admin-stat"><div class="val" id="admin-total">0</div><div class="key">Total Appointments</div></div>
+      <div class="admin-stat"><div class="val" id="admin-confirmed">0</div><div class="key">Confirmed</div></div>
+      <div class="admin-stat"><div class="val" id="admin-pending">0</div><div class="key">Pending</div></div>
+      <div class="admin-stat"><div class="val" id="admin-cancelled">0</div><div class="key">Cancelled</div></div>
+    </div>
+    <table>
+      <thead><tr><th>Patient</th><th>Doctor</th><th>Date</th><th>Slot</th><th>Status</th></tr></thead>
+      <tbody id="admin-table-body"><tr><td colspan="5" style="text-align:center;color:var(--text-muted)">No data</td></tr></tbody>
+    </table>
+  </div>
+</div>
+
+<!-- AUTH PAGE -->
+<div id="page-auth" class="page">
+  <div class="auth-container">
+    <div class="auth-box">
+      <h2>Welcome Back</h2>
+      <p>Sign in to manage your appointments</p>
+      <div class="auth-tabs">
+        <div class="auth-tab active" id="tab-login" onclick="switchTab('login')">Sign In</div>
+        <div class="auth-tab" id="tab-register" onclick="switchTab('register')">Register</div>
+      </div>
+      <div id="auth-alert"></div>
+      <!-- LOGIN FORM -->
+      <div id="login-form">
+        <div class="form-group">
+          <label>Email</label>
+          <input type="email" id="login-email" placeholder="you@example.com">
+        </div>
+        <div class="form-group">
+          <label>Password</label>
+          <input type="password" id="login-password" placeholder="••••••••">
+        </div>
+        <button class="btn-primary" style="width:100%;padding:12px" onclick="doLogin()">Sign In</button>
+        <div style="text-align:center;margin-top:1rem;font-size:13px;color:var(--text-muted)">
+          Admin? Use <strong>admin@clinic.com</strong> / <strong>admin123</strong>
+        </div>
+      </div>
+      <!-- REGISTER FORM -->
+      <div id="register-form" style="display:none">
+        <div class="form-row">
+          <div class="form-group"><label>First Name</label><input type="text" id="reg-fname" placeholder="Ravi"></div>
+          <div class="form-group"><label>Last Name</label><input type="text" id="reg-lname" placeholder="Kumar"></div>
+        </div>
+        <div class="form-group"><label>Email</label><input type="email" id="reg-email" placeholder="you@example.com"></div>
+        <div class="form-group"><label>Phone</label><input type="tel" id="reg-phone" placeholder="+91 9876543210"></div>
+        <div class="form-group"><label>Password</label><input type="password" id="reg-password" placeholder="min 6 characters"></div>
+        <button class="btn-primary" style="width:100%;padding:12px" onclick="doRegister()">Create Account</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- BOOKING MODAL -->
+<div class="modal-overlay" id="booking-modal">
+  <div class="modal">
+    <h2>Book Appointment</h2>
+    <div id="booking-doctor-info" style="background:var(--teal-light);border-radius:10px;padding:1rem;margin-bottom:1.5rem">
+      <div style="font-weight:500" id="bk-doctor-name"></div>
+      <div style="font-size:13px;color:var(--teal)" id="bk-doctor-spec"></div>
+    </div>
+    <div class="form-group">
+      <label>Your Name</label>
+      <input type="text" id="bk-name" placeholder="Full name">
+    </div>
+    <div class="form-group">
+      <label>Phone</label>
+      <input type="tel" id="bk-phone" placeholder="+91 9876543210">
+    </div>
+    <div class="form-row">
+      <div class="form-group">
+        <label>Date</label>
+        <input type="date" id="bk-date">
+      </div>
+      <div class="form-group">
+        <label>Time Slot</label>
+        <input type="text" id="bk-slot" placeholder="e.g. 10:00" readonly>
+      </div>
+    </div>
+    <div class="form-group">
+      <label>Reason (optional)</label>
+      <textarea id="bk-reason" rows="2" placeholder="Brief description of concern..."></textarea>
+    </div>
+    <div class="modal-actions">
+      <button class="btn-secondary" onclick="closeModal()">Cancel</button>
+      <button class="btn-primary" onclick="confirmBooking()">Confirm Booking</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+const API = 'http://98.93.76.69:8080';
+let currentUser = null;
+let allDoctors = [];
+let appointments = JSON.parse(localStorage.getItem('appointments') || '[]');
+let users = JSON.parse(localStorage.getItem('users') || '[]');
+let selectedDoctor = null;
+let selectedSlot = '';
+let activeFilter = '';
+
+// seed admin user
+if (!users.find(u => u.email === 'admin@clinic.com')) {
+  users.push({ email: 'admin@clinic.com', password: 'admin123', name: 'Admin', role: 'admin' });
+  localStorage.setItem('users', JSON.stringify(users));
+}
+
+function showPage(page) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.nav-links a').forEach(a => a.classList.remove('active'));
+  document.getElementById('page-' + page).classList.add('active');
+  const nav = document.getElementById('nav-' + page);
+  if (nav) nav.classList.add('active');
+  if (page === 'doctors') loadDoctors();
+  if (page === 'appointments') loadAppointments();
+  if (page === 'admin') loadAdmin();
+  window.scrollTo(0, 0);
+}
+
+function showToast(msg, color) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.style.background = color || 'var(--teal-dark)';
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 3000);
+}
+
+async function loadDoctors() {
+  const grid = document.getElementById('doctors-grid');
+  grid.innerHTML = '<div class="empty-state"><div class="icon">⏳</div><p>Loading...</p></div>';
+  try {
+    const res = await fetch(API + '/doctors/');
+    if (!res.ok) throw new Error('API error');
+    allDoctors = await res.json();
+    buildFilters();
+    renderDoctors(allDoctors);
+  } catch (e) {
+    grid.innerHTML = '<div class="empty-state"><div class="icon">⚠️</div><p>Could not load doctors. Check API.</p></div>';
+  }
+}
+
+function buildFilters() {
+  const specs = [...new Set(allDoctors.map(d => d.specialty || d.specialization).filter(Boolean))];
+  const container = document.getElementById('speciality-filters');
+  container.innerHTML = '<button class="filter-btn active" onclick="filterDoctors(\'\', this)">All</button>';
+  specs.forEach(s => {
+    const btn = document.createElement('button');
+    btn.className = 'filter-btn';
+    btn.textContent = s;
+    btn.onclick = function() { filterDoctors(s, this); };
+    container.appendChild(btn);
+  });
+}
+
+function filterDoctors(spec, btn) {
+  activeFilter = spec;
+  document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+  if (btn) btn.classList.add('active');
+  const filtered = spec ? allDoctors.filter(d => (d.specialty || d.specialization) === spec) : allDoctors;
+  renderDoctors(filtered);
+}
+
+function filterAndGo(spec) {
+  showPage('doctors');
+  setTimeout(() => filterDoctors(spec, null), 100);
+}
+
+function heroSearch(val) {
+  if (!val) return;
+  showPage('doctors');
+  setTimeout(() => {
+    const filtered = allDoctors.filter(d =>
+      d.name.toLowerCase().includes(val.toLowerCase()) ||
+      (d.specialty || d.specialization || '').toLowerCase().includes(val.toLowerCase())
+    );
+    renderDoctors(filtered);
+  }, 150);
+}
+
+function renderDoctors(docs) {
+  const grid = document.getElementById('doctors-grid');
+  if (!docs.length) {
+    grid.innerHTML = '<div class="empty-state"><div class="icon">🔍</div><p>No doctors found.</p></div>';
+    return;
+  }
+  grid.innerHTML = docs.map(d => {
+    const spec = d.specialty || d.specialization || 'General';
+    const initials = d.name.split(' ').map(w => w[0]).slice(0, 2).join('');
+    const slots = d.slots || [];
+    const available = d.available !== false;
+    return `
+    <div class="doctor-card">
+      <div class="doctor-card-top">
+        <div class="doctor-avatar">${initials}</div>
+        <div>
+          <div class="doctor-name">${d.name}</div>
+          <div class="doctor-spec">${spec}</div>
+        </div>
+      </div>
+      <div class="doctor-card-body">
+        <div class="doctor-meta">
+          <div class="meta-item"><strong>${d.experience || '—'} yrs</strong>Experience</div>
+          <div class="meta-item"><strong>₹${d.fee || '—'}</strong>Fee</div>
+          <div class="meta-item"><strong>${available ? '✓ Available' : '✗ Unavailable'}</strong>Status</div>
+        </div>
+        ${available && slots.length ? `
+        <div class="slots" id="slots-${d.id}">
+          ${slots.map(s => `<div class="slot" onclick="selectSlot('${d.id}','${s}',this)">${s}</div>`).join('')}
+        </div>` : available ? '' : `<div class="unavailable-badge">Not Available</div>`}
+        <button class="book-btn" id="book-btn-${d.id}" onclick="openBooking('${d.id}')" ${!available ? 'disabled' : ''}>
+          ${available ? 'Book Appointment' : 'Unavailable'}
+        </button>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function selectSlot(docId, slot, el) {
+  document.querySelectorAll(`#slots-${docId} .slot`).forEach(s => s.classList.remove('selected'));
+  el.classList.add('selected');
+  selectedSlot = slot;
+}
+
+function openBooking(docId) {
+  if (!currentUser) { showToast('Please sign in to book', 'var(--coral)'); showPage('auth'); return; }
+  selectedDoctor = allDoctors.find(d => d.id === docId);
+  if (!selectedDoctor) return;
+  document.getElementById('bk-doctor-name').textContent = selectedDoctor.name;
+  document.getElementById('bk-doctor-spec').textContent = selectedDoctor.specialty || selectedDoctor.specialization || '';
+  document.getElementById('bk-name').value = currentUser.name || '';
+  document.getElementById('bk-phone').value = currentUser.phone || '';
+  document.getElementById('bk-slot').value = selectedSlot || '';
+  const today = new Date().toISOString().split('T')[0];
+  document.getElementById('bk-date').min = today;
+  document.getElementById('bk-date').value = today;
+  document.getElementById('booking-modal').classList.add('open');
+}
+
+function closeModal() {
+  document.getElementById('booking-modal').classList.remove('open');
+  selectedSlot = '';
+}
+
+async function confirmBooking() {
+  const name = document.getElementById('bk-name').value.trim();
+  const phone = document.getElementById('bk-phone').value.trim();
+  const date = document.getElementById('bk-date').value;
+  const slot = document.getElementById('bk-slot').value || selectedSlot;
+  const reason = document.getElementById('bk-reason').value.trim();
+  if (!name || !date || !slot) { showToast('Please fill all required fields', 'var(--coral)'); return; }
+  const appt = {
+    id: 'appt_' + Date.now(),
+    patientName: name,
+    phone,
+    doctorId: selectedDoctor.id,
+    doctorName: selectedDoctor.name,
+    specialty: selectedDoctor.specialty || selectedDoctor.specialization,
+    date,
+    slot,
+    reason,
+    status: 'confirmed',
+    userEmail: currentUser.email,
+    createdAt: new Date().toISOString()
+  };
+
+  try {
+    await fetch(API + '/appointments/', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        doctor_id: selectedDoctor.id,
+        patient_name: name,
+        date,
+        slot,
+        reason
+      })
+    });
+  } catch (e) {}
+
+  appointments.push(appt);
+  localStorage.setItem('appointments', JSON.stringify(appointments));
+  closeModal();
+  showToast('Appointment booked successfully!');
+  showPage('appointments');
+}
+
+function loadAppointments() {
+  const container = document.getElementById('appointments-list');
+  const myAppts = currentUser
+    ? appointments.filter(a => a.userEmail === currentUser.email)
+    : [];
+  if (!myAppts.length) {
+    container.innerHTML = '<div class="empty-state"><div class="icon">📅</div><p>No appointments yet. Book one now!</p></div>';
+    return;
+  }
+  container.innerHTML = myAppts.reverse().map(a => `
+    <div class="appt-card">
+      <div class="appt-status status-${a.status}"></div>
+      <div class="appt-info">
+        <h3>${a.doctorName}</h3>
+        <p>${a.specialty} &nbsp;|&nbsp; ${a.date} at ${a.slot}</p>
+        ${a.reason ? `<p style="margin-top:4px;font-style:italic">"${a.reason}"</p>` : ''}
+      </div>
+      <span class="appt-badge badge-${a.status}">${a.status}</span>
+      ${a.status !== 'cancelled' ? `<button class="cancel-btn" onclick="cancelAppt('${a.id}')">Cancel</button>` : ''}
+    </div>
+  `).join('');
+}
+
+function cancelAppt(id) {
+  const appt = appointments.find(a => a.id === id);
+  if (appt) { appt.status = 'cancelled'; localStorage.setItem('appointments', JSON.stringify(appointments)); }
+  loadAppointments();
+  showToast('Appointment cancelled');
+}
+
+function loadAdmin() {
+  const total = appointments.length;
+  const confirmed = appointments.filter(a => a.status === 'confirmed').length;
+  const pending = appointments.filter(a => a.status === 'pending').length;
+  const cancelled = appointments.filter(a => a.status === 'cancelled').length;
+  document.getElementById('admin-total').textContent = total;
+  document.getElementById('admin-confirmed').textContent = confirmed;
+  document.getElementById('admin-pending').textContent = pending;
+  document.getElementById('admin-cancelled').textContent = cancelled;
+  const tbody = document.getElementById('admin-table-body');
+  if (!appointments.length) {
+    tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;color:var(--text-muted);padding:2rem">No appointments yet</td></tr>';
+    return;
+  }
+  tbody.innerHTML = appointments.map(a => `
+    <tr>
+      <td>${a.patientName}</td>
+      <td>${a.doctorName}</td>
+      <td>${a.date}</td>
+      <td>${a.slot}</td>
+      <td><span class="appt-badge badge-${a.status}">${a.status}</span></td>
+    </tr>
+  `).join('');
+}
+
+function switchTab(tab) {
+  document.getElementById('login-form').style.display = tab === 'login' ? 'block' : 'none';
+  document.getElementById('register-form').style.display = tab === 'register' ? 'block' : 'none';
+  document.getElementById('tab-login').classList.toggle('active', tab === 'login');
+  document.getElementById('tab-register').classList.toggle('active', tab === 'register');
+  document.getElementById('auth-alert').innerHTML = '';
+}
+
+function showAuthAlert(msg, type) {
+  document.getElementById('auth-alert').innerHTML = `<div class="alert alert-${type}">${msg}</div>`;
+}
+
+function doLogin() {
+  const email = document.getElementById('login-email').value.trim();
+  const pass = document.getElementById('login-password').value;
+  const user = users.find(u => u.email === email && u.password === pass);
+  if (!user) { showAuthAlert('Invalid email or password', 'error'); return; }
+  currentUser = user;
+  localStorage.setItem('currentUser', JSON.stringify(user));
+  updateAuthUI();
+  showPage('home');
+  showToast('Welcome back, ' + user.name + '!');
+}
+
+function doRegister() {
+  const fname = document.getElementById('reg-fname').value.trim();
+  const lname = document.getElementById('reg-lname').value.trim();
+  const email = document.getElementById('reg-email').value.trim();
+  const phone = document.getElementById('reg-phone').value.trim();
+  const pass = document.getElementById('reg-password').value;
+  if (!fname || !email || !pass) { showAuthAlert('Please fill all required fields', 'error'); return; }
+  if (pass.length < 6) { showAuthAlert('Password must be at least 6 characters', 'error'); return; }
+  if (users.find(u => u.email === email)) { showAuthAlert('Email already registered', 'error'); return; }
+  const user = { email, password: pass, name: fname + ' ' + lname, phone, role: 'patient' };
+  users.push(user);
+  localStorage.setItem('users', JSON.stringify(users));
+  currentUser = user;
+  localStorage.setItem('currentUser', JSON.stringify(user));
+  updateAuthUI();
+  showPage('home');
+  showToast('Account created! Welcome, ' + fname + '!');
+}
+
+function logout() {
+  currentUser = null;
+  localStorage.removeItem('currentUser');
+  updateAuthUI();
+  showPage('home');
+  showToast('Logged out successfully');
+}
+
+function updateAuthUI() {
+  const authBtn = document.getElementById('auth-nav-btn');
+  const logoutBtn = document.getElementById('logout-btn');
+  const userDisp = document.getElementById('user-display');
+  const adminNav = document.getElementById('nav-admin');
+  if (currentUser) {
+    authBtn.style.display = 'none';
+    logoutBtn.style.display = 'inline-block';
+    userDisp.textContent = 'Hi, ' + currentUser.name.split(' ')[0];
+    adminNav.style.display = currentUser.role === 'admin' ? 'inline' : 'none';
+  } else {
+    authBtn.style.display = 'inline-block';
+    logoutBtn.style.display = 'none';
+    userDisp.textContent = '';
+    adminNav.style.display = 'none';
+  }
+}
+
+// init
+const saved = localStorage.getItem('currentUser');
+if (saved) { currentUser = JSON.parse(saved); updateAuthUI(); }
+loadDoctors();
+</script>
+</body>
+</html>
