@@ -2,7 +2,7 @@ from fastapi import FastAPI
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 from fastapi.middleware.cors import CORSMiddleware
-from app.routes import doctors, appointments, support
+import doctors, appointments, support
 
 app = FastAPI(title="CarePoint Clinic Booking API", version="1.0.0")
 

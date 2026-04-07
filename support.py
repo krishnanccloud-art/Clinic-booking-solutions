@@ -1,6 +1,6 @@
 from fastapi import APIRouter
-from app.db import get_db
-from app.models import SupportTicket
+from db import get_db
+from models import SupportTicket
 import uuid
 
 router = APIRouter()

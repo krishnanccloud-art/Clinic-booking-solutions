@@ -1,6 +1,6 @@
 from fastapi import APIRouter, HTTPException
-from app.db import get_db
-from app.models import AppointmentCreate
+from db import get_db
+from models import AppointmentCreate
 import uuid
 
 router = APIRouter()
